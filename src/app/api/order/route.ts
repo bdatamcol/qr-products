@@ -5,7 +5,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { customer, items, total, notes } = body as {
-      customer: { name: string; email: string; phone?: string };
+      customer: { name: string; email: string; phone?: string; business_name?: string | null };
       items: Array<{ id: string; name: string; brandId: string; price: number; qty: number }>;
       total: number;
       notes?: string;
@@ -30,10 +30,20 @@ export async function POST(req: NextRequest) {
       let customerId: number;
       if (cRes.rowCount && cRes.rows[0]) {
         customerId = cRes.rows[0].id;
+        // Actualizar datos del cliente si vienen en el payload
+        await client.query(
+          "update customers set name=COALESCE($2,name), phone=COALESCE($3,phone), business_name=COALESCE($4,business_name) where id=$1",
+          [
+            customerId,
+            customer.name || null,
+            customer.phone ?? null,
+            customer.business_name ?? null,
+          ]
+        );
       } else {
         const ins = await client.query(
-          "insert into customers(name,email,phone) values($1,$2,$3) returning id",
-          [customer.name, customer.email, customer.phone ?? null]
+          "insert into customers(name,email,phone,business_name) values($1,$2,$3,$4) returning id",
+          [customer.name, customer.email, customer.phone ?? null, customer.business_name ?? null]
         );
         customerId = ins.rows[0].id;
       }

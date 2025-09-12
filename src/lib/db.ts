@@ -17,6 +17,9 @@ export async function ensureSchema() {
       created_at timestamptz not null default now()
     );
 
+    -- Agregar razón social si no existe
+    alter table if exists customers add column if not exists business_name text;
+
     create table if not exists orders (
       id serial primary key,
       customer_id integer not null references customers(id) on delete cascade,

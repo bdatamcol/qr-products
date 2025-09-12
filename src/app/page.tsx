@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { brands, type Product } from "@/data/brands";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,6 +26,7 @@ export default function Home() {
   // Datos del cliente
   const [customer, setCustomer] = useState({
     name: "",
+    businessName: "",
     email: "",
     phone: "",
     notes: "",
@@ -33,6 +34,42 @@ export default function Home() {
   const [showCustomerDialog, setShowCustomerDialog] = useState<null | "pdf" | "email">(null);
   const cartCount = useMemo(() => cart.reduce((s, it) => s + it.qty, 0), [cart]);
   const [cartOpen, setCartOpen] = useState(false);
+
+  // Cargar carrito guardado al montar
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("cart") || localStorage.getItem("products");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          // validamos estructura mínima
+          const restored = parsed
+            .filter((x: any) => x && x.id && typeof x.qty === "number")
+            .map((x: any) => ({ ...x }));
+          if (restored.length > 0) setCart(restored);
+        }
+      }
+    } catch (e) {
+      console.error("No se pudo restaurar el carrito desde localStorage", e);
+    }
+  }, []);
+
+  // Guardar carrito en cada cambio
+  useEffect(() => {
+    try {
+      if (cart.length > 0) {
+        const data = JSON.stringify(cart);
+        localStorage.setItem("cart", data);
+        // Compatibilidad con posibles lecturas previas
+        localStorage.setItem("products", data);
+      } else {
+        localStorage.removeItem("cart");
+        localStorage.removeItem("products");
+      }
+    } catch (e) {
+      console.error("No se pudo guardar el carrito en localStorage", e);
+    }
+  }, [cart]);
 
   const addToCart = (brandId: string, p: Product) => {
     setCart((prev) => {
@@ -57,15 +94,29 @@ export default function Home() {
     });
   };
 
+  const updateQty = (id: string, qty: number) => {
+    setCart((prev) => {
+      const q = Number.isFinite(qty) ? Math.max(0, Math.floor(qty)) : 1;
+      if (q <= 0) return prev.filter((x) => x.id !== id);
+      return prev.map((x) => (x.id === id ? { ...x, qty: q } : x));
+    });
+  };
+
   const removeItem = (id: string) => setCart((prev) => prev.filter((x) => x.id !== id));
   const clearCart = () => setCart([]);
 
   const saveOrder = async () => {
     try {
+      const customerPayload = {
+        name: customer.name,
+        email: customer.email,
+        phone: customer.phone,
+        business_name: customer.businessName || null,
+      };
       const res = await fetch("/api/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ customer, items: cart.map(({ id, name, brandId, price, qty }) => ({ id, name, brandId, price, qty })), total, notes: customer.notes }),
+        body: JSON.stringify({ customer: customerPayload, items: cart.map(({ id, name, brandId, price, qty }) => ({ id, name, brandId, price, qty })), total, notes: customer.notes }),
       });
       if (!res.ok) throw new Error("fallo al guardar");
       return true;
@@ -91,14 +142,15 @@ export default function Home() {
 
     doc.setFontSize(11);
     doc.text(`Cliente: ${customer.name || "-"}`, 14, 26);
-    doc.text(`Email: ${customer.email || "-"}`, 14, 32);
-    doc.text(`Teléfono: ${customer.phone || "-"}`, 14, 38);
+    doc.text(`Razón social: ${customer.businessName || "-"}`, 14, 32);
+    doc.text(`Email: ${customer.email || "-"}`, 14, 38);
+    doc.text(`Teléfono: ${customer.phone || "-"}`, 14, 44);
 
     // Tabla de productos
     const rows = cart.map((it) => [it.name, it.qty.toString(), `$${it.price.toLocaleString()}`, `$${(it.price * it.qty).toLocaleString()}`]);
     // @ts-ignore
     autoTable(doc, {
-      startY: 44,
+      startY: 50,
       head: [["Producto", "Cant.", "Precio", "Subtotal"]],
       body: rows,
       styles: { fontSize: 10 },
@@ -144,8 +196,9 @@ export default function Home() {
       doc.text("Resumen de Pedido", 14, 16);
       doc.setFontSize(11);
       doc.text(`Cliente: ${customer.name}`, 14, 26);
-      doc.text(`Email: ${customer.email}`, 14, 32);
-      doc.text(`Teléfono: ${customer.phone || "-"}`, 14, 38);
+      doc.text(`Razón social: ${customer.businessName || "-"}`, 14, 32);
+      doc.text(`Email: ${customer.email}`, 14, 38);
+      doc.text(`Teléfono: ${customer.phone || "-"}`, 14, 44);
 
       const rows = cart.map((it) => [
         it.name,
@@ -155,7 +208,7 @@ export default function Home() {
       ]);
       // @ts-ignore
       autoTable(doc, {
-        startY: 44,
+        startY: 50,
         head: [["Producto", "Cant.", "Precio", "Subtotal"]],
         body: rows,
       });
@@ -340,20 +393,25 @@ export default function Home() {
                 const inCart = cart.find((x) => x.id === p.id)?.qty ?? 0;
                 return (
                   <Card key={p.id} className="border-muted">
-                    <CardContent className="pt-3">
-                      <div className="text-sm font-medium leading-tight line-clamp-2 min-h-[2.5rem]">{p.name}</div>
-                      <div className="text-xs text-muted-foreground mt-1">${p.price.toLocaleString()}</div>
-                      <Button
-                        size="sm"
-                        className={`mt-2 w-full ${inCart > 0 ? "bg-emerald-600 hover:bg-emerald-600 text-white" : ""}`}
-                        onClick={() => addToCart(b.id, p)}
-                      >
-                        {inCart > 0 ? (
-                          <span className="inline-flex items-center gap-2"><Check className="h-4 w-4" /> En el carrito (x{inCart})</span>
-                        ) : (
-                          "Agregar"
-                        )}
-                      </Button>
+                    <CardContent className="p-2">
+                      <div className="text-xs font-medium leading-tight line-clamp-2 min-h-[2.2rem]">{p.name}</div>
+                      <div className="text-[11px] text-muted-foreground mt-1">${p.price.toLocaleString()}</div>
+                      {inCart === 0 ? (
+                        <Button size="sm" className="mt-2 w-full" onClick={() => addToCart(b.id, p)}>
+                          Agregar
+                        </Button>
+                      ) : (
+                        <div className="mt-2 flex items-center gap-2">
+                          <Badge variant="secondary" className="whitespace-nowrap">Agregado</Badge>
+                          <Input
+                            type="number"
+                            min={1}
+                            value={inCart}
+                            onChange={(e) => updateQty(p.id, parseInt(e.target.value || "1", 10))}
+                            className="w-20 h-8"
+                          />
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 );
@@ -374,6 +432,8 @@ export default function Home() {
           <div className="space-y-2">
             <Label htmlFor="name">Nombre</Label>
             <Input id="name" placeholder="Tu nombre" value={customer.name} onChange={(e) => setCustomer((s) => ({ ...s, name: e.target.value }))} />
+            <Label htmlFor="businessName">Razón social</Label>
+            <Input id="businessName" placeholder="Empresa / Razón social" value={customer.businessName} onChange={(e) => setCustomer((s) => ({ ...s, businessName: e.target.value }))} />
             <Label htmlFor="email">Correo</Label>
             <Input id="email" type="email" placeholder="tucorreo@dominio.com" value={customer.email} onChange={(e) => setCustomer((s) => ({ ...s, email: e.target.value }))} />
             <Label htmlFor="phone">Teléfono</Label>
