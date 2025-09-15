@@ -13,6 +13,18 @@ export type Brand = {
   products: Product[];
 };
 
+//marcas de productos
+/* 
+Mabe
+LG
+Samsung
+Haceb
+Challenger
+Midea
+Whirlpool
+HQ
+Oppo */
+
 export const brands: Brand[] = [
   {
     id: "samsung",
@@ -48,36 +60,42 @@ export const brands: Brand[] = [
     ],
   },
   {
-    id: "apple",
-    name: "Apple",
+    id: "haceb",
+    name: "Haceb",
     products: [
-      { id: "iphone-15", name: "iPhone 15", price: 17999 },
-      { id: "macbook-air-m2", name: "MacBook Air M2", price: 23999 },
-      { id: "ipad-10", name: "iPad 10th Gen", price: 8999 },
+      { id: "haceb-100", name: "Haceb 100", price: 10999 },
     ],
   },
   {
-    id: "hp",
-    name: "HP",
+    id: "challenger",
+    name: "Challenger",
     products: [
-      { id: "hp-15-ryzen5", name: "Laptop 15 Ryzen 5", price: 10999 },
-      { id: "hp-deskjet-ink", name: "Impresora DeskJet Ink", price: 1999 },
+      { id: "challenger-15-ryzen5", name: "Challenger nevera", price: 10999 },
+      { id: "challenger-15-ryzen5", name: "Challenger lavadora", price: 10999 },
+      { id: "challenger-15-ryzen5", name: "Challenger horno", price: 10999 },
     ],
   },
   {
-    id: "epson",
-    name: "Epson",
+    id: "midea",
+    name: "Midea",
     products: [
-      { id: "epson-l3250", name: "EcoTank L3250", price: 3799 },
-      { id: "epson-l4260", name: "EcoTank L4260", price: 4999 },
+      { id: "midea-l3250", name: "Midea L3250", price: 3799 },
+      { id: "midea-l4260", name: "Midea L4260", price: 4999 },
     ],
   },
   {
-    id: "suzuki",
-    name: "Suzuki",
+    id: "whirlpool",
+    name: "Whirlpool",
     products: [
-      { id: "suzuki-gn125", name: "GN 125 (accesorios)", price: 1499 },
-      { id: "suzuki-aceite", name: "Aceite 4T 1L", price: 199 },
+      { id: "Whirlpool-gn125", name: "GN 125 (accesorios)", price: 1499 },
+      { id: "Whirlpool-aceite", name: "Aceite 4T 1L", price: 199 },
+    ],
+  },
+  {
+    id: "hq",
+    name: "HQ",
+    products: [
+      { id: "hq-100", name: "HQ 100", price: 10999 },
     ],
   },
 ];

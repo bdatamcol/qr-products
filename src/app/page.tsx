@@ -15,6 +15,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { ShoppingCart, Download, Send, GripHorizontal, Check } from "lucide-react";
 import { toast } from "sonner";
 
+const BRAND_LOGOS: Record<string, string> = {
+  samsung: "/SAMSUNG.png",
+  mabe: "/MABE.png",
+  lg: "/LG.png",
+  oppo: "/OPPO.png",
+  haceb: "/HACEB.png",
+  challenger: "/CHALLENGER.png",
+  midea: "/MIDEA.png",
+  whirlpool: "/WHIRLPOOL.png",
+  hq: "/HQ.png",
+};
+
 // Carrito en memoria simple
 type CartItem = Product & { qty: number; brandId: string };
 
@@ -351,7 +363,14 @@ export default function Home() {
           </SelectTrigger>
           <SelectContent>
             {brands.map((b) => (
-              <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+              <SelectItem key={b.id} value={b.id}>
+                <span className="flex items-center gap-2">
+                  {BRAND_LOGOS[b.id] ? (
+                    <img src={BRAND_LOGOS[b.id]} alt={b.name} className="h-4 w-4 object-contain" loading="lazy" width={16} height={16} />
+                  ) : null}
+                  <span>{b.name}</span>
+                </span>
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -380,7 +399,12 @@ export default function Home() {
                 onClick={() => setActiveBrand(b.id)}
                 className={`shrink-0 px-3 py-2 rounded-full border text-xs ${activeBrand === b.id ? "bg-primary text-primary-foreground border-primary" : "bg-card"}`}
               >
-                {b.name}
+                <span className="inline-flex items-center gap-2">
+                  {BRAND_LOGOS[b.id] ? (
+                    <img src={BRAND_LOGOS[b.id]} alt={b.name} className="h-4 w-4 object-contain" loading="lazy" width={16} height={16} />
+                  ) : null}
+                  <span>{b.name}</span>
+                </span>
               </button>
             ))}
           </div>
@@ -394,7 +418,22 @@ export default function Home() {
                 return (
                   <Card key={p.id} className="border-muted">
                     <CardContent className="p-2">
-                      <div className="text-xs font-medium leading-tight line-clamp-2 min-h-[2.2rem]">{p.name}</div>
+                      <div className="flex flex-col items-center gap-1">
+                        {BRAND_LOGOS[b.id] ? (
+                          <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-muted/40 bg-white shadow-sm ring-1 ring-black/5">
+                            <img
+                              src={BRAND_LOGOS[b.id]}
+                              alt={b.name}
+                              title={b.name}
+                              className="h-8 w-8 object-contain"
+                              loading="lazy"
+                              width={32}
+                              height={32}
+                            />
+                          </span>
+                        ) : null}
+                        <div className="text-xs font-medium leading-tight text-center line-clamp-2 min-h-[2.2rem]">{p.name}</div>
+                      </div>
                       <div className="text-[11px] text-muted-foreground mt-1">${p.price.toLocaleString()}</div>
                       {inCart === 0 ? (
                         <Button size="sm" className="mt-2 w-full" onClick={() => addToCart(b.id, p)}>
