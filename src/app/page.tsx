@@ -412,7 +412,7 @@ export default function Home() {
 
         {brands.map((b) => (
           <TabsContent key={b.id} value={b.id} className="mt-2">
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
               {b.products.map((p) => {
                 const inCart = cart.find((x) => x.id === p.id)?.qty ?? 0;
                 return (
