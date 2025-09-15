@@ -375,7 +375,7 @@ export default function Home() {
                   <img
                     src={BRAND_LOGOS[id]}
                     alt={name}
-                    className="h-8 w-8 object-contain"
+                    className="h-12 w-12 object-contain"
                     loading="lazy"
                     width={32}
                     height={32}
