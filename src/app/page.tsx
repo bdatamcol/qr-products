@@ -7,13 +7,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { ShoppingCart, Download, Send, GripHorizontal, Check } from "lucide-react";
+import { ShoppingCart, Download, Send } from "lucide-react";
 import { toast } from "sonner";
+import { Label } from "@radix-ui/react-label";
 
 const BRAND_LOGOS: Record<string, string> = {
   samsung: "/SAMSUNG.png",
@@ -356,24 +355,53 @@ export default function Home() {
 
       {/* Barra desplazable/Select para marcas en móvil */}
       <div className="sm:hidden">
-        <Label className="mb-1 inline-block">Marca</Label>
-        <Select value={activeBrand} onValueChange={setActiveBrand}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Selecciona marca" />
-          </SelectTrigger>
-          <SelectContent>
-            {brands.map((b) => (
-              <SelectItem key={b.id} value={b.id}>
-                <span className="flex items-center gap-2">
-                  {BRAND_LOGOS[b.id] ? (
-                    <img src={BRAND_LOGOS[b.id]} alt={b.name} className="h-12 w-12 object-contain" loading="lazy" width={32} height={32} />
-                  ) : null}
-                  {/* <span>{b.name}</span> */}
-                </span>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {/* Grid de botones de marcas: fila 1 (5) y fila 2 (4) */}
+        {(() => {
+          const FIRST_ROW = ["lg", "hq", "mabe", "midea", "haceb"] as const;
+          const SECOND_ROW = ["samsung", "oppo", "challenger", "whirlpool"] as const;
+          const BrandButton = ({ id }: { id: string }) => {
+            const name = brands.find((x) => x.id === id)?.name || id.toUpperCase();
+            const isActive = activeBrand === id;
+            return (
+              <button
+                key={id}
+                onClick={() => setActiveBrand(id)}
+                aria-label={name}
+                className={`h-10 w-full rounded-md border p-1 flex items-center justify-center transition-colors ${
+                  isActive ? "bg-gray-300 text-primary-foreground border-gray-600 shadow-xs" : "bg-card hover:bg-accent"
+                }`}
+              >
+                {BRAND_LOGOS[id] ? (
+                  <img
+                    src={BRAND_LOGOS[id]}
+                    alt={name}
+                    className="h-6 w-6 object-contain"
+                    loading="lazy"
+                    width={24}
+                    height={24}
+                  />
+                ) : (
+                  <span className="text-xs font-medium">{name}</span>
+                )}
+                <span className="sr-only">{name}</span>
+              </button>
+            );
+          };
+          return (
+            <div className="-mx-1 px-1">
+              <div className="grid grid-cols-5 gap-2 mb-2">
+                {FIRST_ROW.map((id) => (
+                  <BrandButton key={id} id={id} />
+                ))}
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                {SECOND_ROW.map((id) => (
+                  <BrandButton key={id} id={id} />
+                ))}
+              </div>
+            </div>
+          );
+        })()}
       </div>
 
       <Tabs value={activeBrand} onValueChange={setActiveBrand} className="w-full">
@@ -386,29 +414,7 @@ export default function Home() {
           ))}
         </TabsList>
 
-        {/* Scroll horizontal con indicador en mobile */}
-        {/* <div className="sm:hidden -mx-3 px-3">
-          <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-            <span>Desliza para ver más</span>
-            <GripHorizontal className="h-4 w-4" />
-          </div>
-          <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
-            {brands.map((b) => (
-              <button
-                key={b.id}
-                onClick={() => setActiveBrand(b.id)}
-                className={`shrink-0 px-3 py-2 rounded-full border text-xs ${activeBrand === b.id ? "bg-primary text-primary-foreground border-primary" : "bg-card"}`}
-              >
-                <span className="inline-flex items-center gap-2">
-                  {BRAND_LOGOS[b.id] ? (
-                    <img src={BRAND_LOGOS[b.id]} alt={b.name} className="h-4 w-4 object-contain" loading="lazy" width={16} height={16} />
-                  ) : null}
-                  <span>{b.name}</span>
-                </span>
-              </button>
-            ))}
-          </div>
-        </div> */}
+
 
         {brands.map((b) => (
           <TabsContent key={b.id} value={b.id} className="mt-2">
@@ -417,20 +423,8 @@ export default function Home() {
                 const inCart = cart.find((x) => x.id === p.id)?.qty ?? 0;
                 return (
                   <Card key={p.id} className="border-muted">
-                    <CardContent className="p-2">
-                      <div className="w-full aspect-square overflow-hidden rounded-md flex items-center justify-center mb-2">
-                         {BRAND_LOGOS[b.id] ? (
-                           <img
-                             src={BRAND_LOGOS[b.id]}
-                             alt={b.name}
-                             title={b.name}
-                             className="w-full h-full object-contain p-3"
-                             loading="lazy"
-                             width={160}
-                             height={160}
-                           />
-                         ) : null}
-                       </div>
+                    <CardContent className="p-2 pt-2 pb-2">
+
                        <div className="text-xs font-medium leading-tight text-center line-clamp-2 min-h-[2.2rem]">{p.name}</div>
                       <div className="text-[11px] text-muted-foreground mt-1">${p.price.toLocaleString()}</div>
                       {inCart === 0 ? (
