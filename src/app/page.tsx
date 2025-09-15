@@ -375,10 +375,10 @@ export default function Home() {
                   <img
                     src={BRAND_LOGOS[id]}
                     alt={name}
-                    className="h-6 w-6 object-contain"
+                    className="h-8 w-8 object-contain"
                     loading="lazy"
-                    width={24}
-                    height={24}
+                    width={32}
+                    height={32}
                   />
                 ) : (
                   <span className="text-xs font-medium">{name}</span>

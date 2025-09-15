@@ -70,9 +70,9 @@ export const brands: Brand[] = [
     id: "challenger",
     name: "Challenger",
     products: [
-      { id: "challenger-15-ryzen5", name: "Challenger nevera", price: 10999 },
-      { id: "challenger-15-ryzen5", name: "Challenger lavadora", price: 10999 },
-      { id: "challenger-15-ryzen5", name: "Challenger horno", price: 10999 },
+      { id: "challenger-15-nevera", name: "Challenger nevera", price: 10999 },
+      { id: "challenger-lavadora", name: "Challenger lavadora", price: 10999 },
+      { id: "challenger-horno", name: "Challenger horno", price: 10999 },
     ],
   },
   {
