@@ -366,9 +366,9 @@ export default function Home() {
               <SelectItem key={b.id} value={b.id}>
                 <span className="flex items-center gap-2">
                   {BRAND_LOGOS[b.id] ? (
-                    <img src={BRAND_LOGOS[b.id]} alt={b.name} className="h-10 w-10 object-contain" loading="lazy" width={32} height={32} />
+                    <img src={BRAND_LOGOS[b.id]} alt={b.name} className="h-12 w-12 object-contain" loading="lazy" width={32} height={32} />
                   ) : null}
-                  <span>{b.name}</span>
+                  {/* <span>{b.name}</span> */}
                 </span>
               </SelectItem>
             ))}
@@ -418,22 +418,20 @@ export default function Home() {
                 return (
                   <Card key={p.id} className="border-muted">
                     <CardContent className="p-2">
-                      <div className="flex flex-col items-center gap-1">
-                        {BRAND_LOGOS[b.id] ? (
-                          <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-muted/40 bg-white shadow-sm ring-1 ring-black/5">
-                            <img
-                              src={BRAND_LOGOS[b.id]}
-                              alt={b.name}
-                              title={b.name}
-                              className="h-8 w-8 object-contain"
-                              loading="lazy"
-                              width={32}
-                              height={32}
-                            />
-                          </span>
-                        ) : null}
-                        <div className="text-xs font-medium leading-tight text-center line-clamp-2 min-h-[2.2rem]">{p.name}</div>
-                      </div>
+                      <div className="w-full aspect-square overflow-hidden rounded-md flex items-center justify-center mb-2">
+                         {BRAND_LOGOS[b.id] ? (
+                           <img
+                             src={BRAND_LOGOS[b.id]}
+                             alt={b.name}
+                             title={b.name}
+                             className="w-full h-full object-contain p-3"
+                             loading="lazy"
+                             width={160}
+                             height={160}
+                           />
+                         ) : null}
+                       </div>
+                       <div className="text-xs font-medium leading-tight text-center line-clamp-2 min-h-[2.2rem]">{p.name}</div>
                       <div className="text-[11px] text-muted-foreground mt-1">${p.price.toLocaleString()}</div>
                       {inCart === 0 ? (
                         <Button size="sm" className="mt-2 w-full" onClick={() => addToCart(b.id, p)}>
