@@ -366,7 +366,7 @@ export default function Home() {
               <SelectItem key={b.id} value={b.id}>
                 <span className="flex items-center gap-2">
                   {BRAND_LOGOS[b.id] ? (
-                    <img src={BRAND_LOGOS[b.id]} alt={b.name} className="h-4 w-4 object-contain" loading="lazy" width={16} height={16} />
+                    <img src={BRAND_LOGOS[b.id]} alt={b.name} className="h-10 w-10 object-contain" loading="lazy" width={32} height={32} />
                   ) : null}
                   <span>{b.name}</span>
                 </span>
@@ -387,7 +387,7 @@ export default function Home() {
         </TabsList>
 
         {/* Scroll horizontal con indicador en mobile */}
-        <div className="sm:hidden -mx-3 px-3">
+        {/* <div className="sm:hidden -mx-3 px-3">
           <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
             <span>Desliza para ver más</span>
             <GripHorizontal className="h-4 w-4" />
@@ -408,7 +408,7 @@ export default function Home() {
               </button>
             ))}
           </div>
-        </div>
+        </div> */}
 
         {brands.map((b) => (
           <TabsContent key={b.id} value={b.id} className="mt-2">
