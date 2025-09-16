@@ -45,6 +45,7 @@ export default function Home() {
   const [showCustomerDialog, setShowCustomerDialog] = useState<null | "pdf" | "email">(null);
   const cartCount = useMemo(() => cart.reduce((s, it) => s + it.qty, 0), [cart]);
   const [cartOpen, setCartOpen] = useState(false);
+  const [pendingQty, setPendingQty] = useState<Record<string, string>>({});
 
   // Cargar carrito guardado al montar
   useEffect(() => {
@@ -82,18 +83,18 @@ export default function Home() {
     }
   }, [cart]);
 
-  const addToCart = (brandId: string, p: Product) => {
+  const addToCart = (brandId: string, p: Product, qty: number = 1) => {
+    const q = Number.isFinite(qty) && qty > 0 ? Math.floor(qty) : 1;
     setCart((prev) => {
       const idx = prev.findIndex((x) => x.id === p.id);
       if (idx >= 0) {
         const next = [...prev];
-        next[idx] = { ...next[idx], qty: next[idx].qty + 1 };
+        next[idx] = { ...next[idx], qty: next[idx].qty + q };
         return next;
       }
-      return [...prev, { ...p, qty: 1, brandId }];
+      return [...prev, { ...p, qty: q, brandId }];
     });
-    // setCartOpen(true); // Ya no abrimos el carrito automáticamente
-    toast.success(`${p.name} agregado al carrito`);
+    toast.success(`${p.name} x${q} agregado${q > 1 ? "s" : ""} al carrito`);
   };
 
   const decQty = (id: string) => {
@@ -428,17 +429,70 @@ export default function Home() {
                        <div className="text-xs font-medium leading-tight text-center line-clamp-2 min-h-[2.2rem]">{p.name}</div>
                       <div className="text-[11px] text-muted-foreground mt-1">${p.price.toLocaleString()}</div>
                       {inCart === 0 ? (
-                        <Button size="sm" className="mt-2 w-full" onClick={() => addToCart(b.id, p)}>
-                          Agregar
-                        </Button>
+                        <div className="mt-2 flex items-center gap-2">
+                          <Input
+                            type="number"
+                            min={1}
+                            inputMode="numeric"
+                            placeholder="1"
+                            value={pendingQty[p.id] ?? ""}
+                            onChange={(e) => {
+                              const raw = e.target.value;
+                              // permitir vacío para que el usuario pueda borrar
+                              if (raw === "") {
+                                setPendingQty((s) => ({ ...s, [p.id]: "" }));
+                                return;
+                              }
+                              // solo guardar números enteros positivos como string
+                              const n = Math.floor(Number(raw));
+                              if (Number.isFinite(n) && n > 0) {
+                                setPendingQty((s) => ({ ...s, [p.id]: String(n) }));
+                              }
+                            }}
+                            className="w-16 h-8"
+                          />
+                          <Button
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => {
+                              const raw = pendingQty[p.id];
+                              const n = Math.floor(Number(raw));
+                              const q = Number.isFinite(n) && n > 0 ? n : 1;
+                              addToCart(b.id, p, q);
+                              setPendingQty((s) => ({ ...s, [p.id]: "" }));
+                            }}
+                          >
+                            Agregar
+                          </Button>
+                        </div>
                       ) : (
                         <div className="mt-2 flex items-center gap-2">
                           <Badge variant="secondary" className="whitespace-nowrap">Agregado</Badge>
                           <Input
                             type="number"
                             min={1}
-                            value={inCart}
-                            onChange={(e) => updateQty(p.id, parseInt(e.target.value || "1", 10))}
+                            inputMode="numeric"
+                            placeholder={String(inCart)}
+                            value={pendingQty[p.id] ?? ""}
+                            onChange={(e) => {
+                              const raw = e.target.value;
+                              if (raw === "") {
+                                setPendingQty((s) => ({ ...s, [p.id]: "" }));
+                                return;
+                              }
+                              const n = Math.floor(Number(raw));
+                              if (Number.isFinite(n) && n > 0) {
+                                setPendingQty((s) => ({ ...s, [p.id]: String(n) }));
+                                updateQty(p.id, n);
+                              }
+                            }}
+                            onBlur={() => {
+                              setPendingQty((s) => {
+                                const c = { ...s };
+                                delete c[p.id];
+                                return c;
+                              });
+                            }}
                             className="w-20 h-8"
                           />
                         </div>
