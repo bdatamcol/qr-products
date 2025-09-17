@@ -71,6 +71,7 @@ async function downloadOrderPdf(customer: Customer, order: Order) {
   if (order.notes) doc.text(`Notas: ${order.notes}`, 14, 56);
   const startY = order.notes ? 62 : 56;
   const rows = order.items.map((it) => [
+    it.product_id,
     it.product_name,
     String(it.qty),
     `$${it.price.toLocaleString()}`,
@@ -78,7 +79,7 @@ async function downloadOrderPdf(customer: Customer, order: Order) {
   ]);
   autoTable(doc, {
     startY,
-    head: [["Producto", "Cant.", "Precio", "Subtotal"]],
+    head: [["Ref.", "Producto", "Cant.", "Precio", "Subtotal"]],
     body: rows,
     styles: { fontSize: 10 },
   });
@@ -226,8 +227,11 @@ export default function PedidosPage() {
                         {o.items.map((it, idx) => (
                           <div key={`${it.product_id}-${idx}`} className="flex items-center justify-between text-sm">
                             <div className="truncate pr-2">
-                              <span className="font-medium">{it.product_name}</span>{" "}
-                              <span className="text-xs text-muted-foreground">({it.brand_id})</span>
+                              <div>
+                                <span className="font-medium">{it.product_name}</span>{" "}
+                                <span className="text-xs text-muted-foreground">({it.brand_id})</span>
+                              </div>
+                              <div className="text-[11px] text-muted-foreground">Ref: {it.product_id}</div>
                             </div>
                             <div className="whitespace-nowrap text-right text-xs">
                               x{it.qty} · ${it.price.toLocaleString()} = ${it.subtotal.toLocaleString()}

@@ -159,11 +159,11 @@ export default function Home() {
     doc.text(`Teléfono: ${customer.phone || "-"}`, 14, 44);
 
     // Tabla de productos
-    const rows = cart.map((it) => [it.name, it.qty.toString(), `$${it.price.toLocaleString()}`, `$${(it.price * it.qty).toLocaleString()}`]);
+    const rows = cart.map((it) => [it.id, it.name, it.qty.toString(), `$${it.price.toLocaleString()}`, `$${(it.price * it.qty).toLocaleString()}`]);
     // @ts-ignore
     autoTable(doc, {
       startY: 50,
-      head: [["Producto", "Cant.", "Precio", "Subtotal"]],
+      head: [["Ref.", "Producto", "Cant.", "Precio", "Subtotal"]],
       body: rows,
       styles: { fontSize: 10 },
       headStyles: { fillColor: [33, 150, 243] },
@@ -213,6 +213,7 @@ export default function Home() {
       doc.text(`Teléfono: ${customer.phone || "-"}`, 14, 44);
 
       const rows = cart.map((it) => [
+        it.id,
         it.name,
         it.qty.toString(),
         `$${it.price.toLocaleString()}`,
@@ -221,7 +222,7 @@ export default function Home() {
       // @ts-ignore
       autoTable(doc, {
         startY: 50,
-        head: [["Producto", "Cant.", "Precio", "Subtotal"]],
+        head: [["Ref.", "Producto", "Cant.", "Precio", "Subtotal"]],
         body: rows,
       });
 
@@ -316,6 +317,7 @@ export default function Home() {
                       <CardContent className="py-3 flex items-center justify-between gap-2">
                         <div>
                           <div className="text-sm font-medium line-clamp-2 max-w-[12rem]">{it.name}</div>
+                          <div className="text-[11px] text-muted-foreground">Ref: {it.id}</div>
                           <div className="text-xs text-muted-foreground">${it.price.toLocaleString()} c/u</div>
                         </div>
                         <div className="flex items-center gap-2">
