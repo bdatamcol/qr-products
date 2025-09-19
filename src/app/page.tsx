@@ -133,7 +133,7 @@ export default function Home() {
       const res = await fetch("/api/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ customer: customerPayload, items: cart.map(({ id, name, brandId, price, qty }) => ({ id, name, brandId, price, qty })), total, notes: customer.notes }),
+        body: JSON.stringify({ customer: customerPayload, items: cart.map(({ id, name, brandId, price, qty }) => ({ id, name, brandId, price, qty, priceType: id.endsWith('-p2') ? 2 : 1 })), total, notes: customer.notes }),
       });
       if (!res.ok) throw new Error("fallo al guardar");
       return true;

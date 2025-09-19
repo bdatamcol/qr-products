@@ -15,6 +15,7 @@ interface OrderItem {
   price: number;
   qty: number;
   subtotal: number;
+  price_type: number;
 }
 
 interface Order {
@@ -146,7 +147,7 @@ export default function PedidosPage() {
     const header = [
       "customer_id","customer_name","business_name","email","phone",
       "order_id","order_date","order_notes","order_total",
-      "product_id","product_name","brand_id","price","qty","subtotal"
+      "product_id","product_name","brand_id","price","qty","subtotal","price_type"
     ];
     const rows: string[][] = [header];
     for (const c of filtered) {
@@ -155,14 +156,14 @@ export default function PedidosPage() {
           rows.push([
             String(c.id), c.name, c.business_name ?? "", c.email, c.phone ?? "",
             String(o.id), new Date(o.created_at).toISOString(), o.notes ?? "", String(o.total),
-            "", "", "", "", "", ""
+            "", "", "", "", "", "", ""
           ]);
         } else {
           for (const it of o.items) {
             rows.push([
               String(c.id), c.name, c.business_name ?? "", c.email, c.phone ?? "",
               String(o.id), new Date(o.created_at).toISOString(), o.notes ?? "", String(o.total),
-              it.product_id, it.product_name, it.brand_id, String(it.price), String(it.qty), String(it.subtotal)
+              it.product_id, it.product_name, it.brand_id, String(it.price), String(it.qty), String(it.subtotal), String(it.price_type || 1)
             ]);
           }
         }

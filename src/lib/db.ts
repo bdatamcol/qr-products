@@ -35,7 +35,11 @@ export async function ensureSchema() {
       product_name text not null,
       brand_id text not null,
       price numeric not null,
-      qty integer not null
+      qty integer not null,
+      price_type integer not null default 1
     );
+    
+    -- Agregar columna price_type si no existe en tablas antiguas
+    alter table if exists order_items add column if not exists price_type integer not null default 1;
   `);
 }

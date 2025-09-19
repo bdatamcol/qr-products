@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { customer, items, total, notes } = body as {
       customer: { name: string; email: string; phone?: string; business_name?: string | null };
-      items: Array<{ id: string; name: string; brandId: string; price: number; qty: number }>;
+      items: Array<{ id: string; name: string; brandId: string; price: number; qty: number; priceType?: number }>;
       total: number;
       notes?: string;
     };
@@ -55,9 +55,10 @@ export async function POST(req: NextRequest) {
       const orderId = oRes.rows[0].id as number;
 
       for (const it of items) {
+        const priceType = it.priceType || (it.id.endsWith('-p2') ? 2 : 1);
         await client.query(
-          "insert into order_items(order_id, product_id, product_name, brand_id, price, qty) values($1,$2,$3,$4,$5,$6)",
-          [orderId, it.id, it.name, it.brandId, it.price, it.qty]
+          "insert into order_items(order_id, product_id, product_name, brand_id, price, qty, price_type) values($1,$2,$3,$4,$5,$6,$7)",
+          [orderId, it.id, it.name, it.brandId, it.price, it.qty, priceType]
         );
       }
 

@@ -24,7 +24,8 @@ export async function GET(_req: NextRequest) {
          oi.product_name,
          oi.brand_id,
          oi.price,
-         oi.qty
+         oi.qty,
+         oi.price_type
        from orders o
        join customers c on c.id = o.customer_id
        left join order_items oi on oi.order_id = o.id
@@ -68,6 +69,7 @@ export async function GET(_req: NextRequest) {
           brand_id: r.brand_id,
           price: Number(r.price),
           qty: Number(r.qty),
+          price_type: Number(r.price_type),
           subtotal: Number(r.price) * Number(r.qty),
         });
       }
