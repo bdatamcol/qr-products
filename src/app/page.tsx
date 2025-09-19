@@ -23,7 +23,11 @@ const BRAND_LOGOS: Record<string, string> = {
   challenger: "/CHALLENGER.png",
   midea: "/MIDEA.png",
   whirlpool: "/WHIRLPOOL.png",
-  hq: "/HQ.png",
+  hp: "/HP.png",
+  lenovo: "/LENOVO.png",
+  hyundai: "/HYUNDAI.png",
+  epson: "/EPSON.png",
+  electrolux: "/ELECTROLUX.png",
 };
 
 // Carrito en memoria simple
@@ -46,6 +50,7 @@ export default function Home() {
   const cartCount = useMemo(() => cart.reduce((s, it) => s + it.qty, 0), [cart]);
   const [cartOpen, setCartOpen] = useState(false);
   const [pendingQty, setPendingQty] = useState<Record<string, string>>({});
+  const [pendingQty2, setPendingQty2] = useState<Record<string, string>>({});
 
   // Cargar carrito guardado al montar
   useEffect(() => {
@@ -159,7 +164,12 @@ export default function Home() {
     doc.text(`Teléfono: ${customer.phone || "-"}`, 14, 44);
 
     // Tabla de productos
-    const rows = cart.map((it) => [it.id, it.name, it.qty.toString(), `$${it.price.toLocaleString()}`, `$${(it.price * it.qty).toLocaleString()}`]);
+    const rows = cart.map((it) => {
+                        const isPrice2 = it.id.endsWith('-p2');
+                        const priceText = isPrice2 ? `${it.price.toLocaleString()} (P2)` : it.price.toLocaleString();
+                        const productId = isPrice2 ? it.id.replace('-p2', '') : it.id;
+                        return [productId, it.name, it.qty.toString(), `$${priceText}`, `$${(it.price * it.qty).toLocaleString()}`];
+                      });
     // @ts-ignore
     autoTable(doc, {
       startY: 50,
@@ -212,13 +222,12 @@ export default function Home() {
       doc.text(`Email: ${customer.email}`, 14, 38);
       doc.text(`Teléfono: ${customer.phone || "-"}`, 14, 44);
 
-      const rows = cart.map((it) => [
-        it.id,
-        it.name,
-        it.qty.toString(),
-        `$${it.price.toLocaleString()}`,
-        `$${(it.price * it.qty).toLocaleString()}`,
-      ]);
+      const rows = cart.map((it) => {
+        const isPrice2 = it.id.endsWith('-p2');
+        const priceText = isPrice2 ? `${it.price.toLocaleString()} (P2)` : it.price.toLocaleString();
+        const productId = isPrice2 ? it.id.replace('-p2', '') : it.id;
+        return [productId, it.name, it.qty.toString(), `$${priceText}`, `$${(it.price * it.qty).toLocaleString()}`];
+      });
       // @ts-ignore
       autoTable(doc, {
         startY: 50,
@@ -319,6 +328,10 @@ export default function Home() {
                           <div className="text-sm font-medium line-clamp-2 max-w-[12rem]">{it.name}</div>
                           <div className="text-[11px] text-muted-foreground">Ref: {it.id}</div>
                           <div className="text-xs text-muted-foreground">${it.price.toLocaleString()} c/u</div>
+                          {/* Mostrar si es precio 2 */}
+                          {it.id.endsWith('-p2') && (
+                            <div className="text-xs text-blue-600 font-medium">Precio 2</div>
+                          )}
                         </div>
                         <div className="flex items-center gap-2">
                           <Badge variant="secondary">x{it.qty}</Badge>
@@ -358,10 +371,10 @@ export default function Home() {
 
       {/* Barra desplazable/Select para marcas en móvil */}
       <div className="sm:hidden">
-        {/* Grid de botones de marcas: fila 1 (5) y fila 2 (4) */}
+        {/* Grid de botones de marcas: fila 1 (6) y fila 2 (6) */}
         {(() => {
-          const FIRST_ROW = ["lg", "hq", "mabe", "midea", "haceb"] as const;
-          const SECOND_ROW = ["samsung", "oppo", "challenger", "whirlpool"] as const;
+          const FIRST_ROW = ["lg", "hp", "mabe", "midea", "haceb", "samsung"] as const;
+          const SECOND_ROW = ["oppo", "challenger", "whirlpool", "lenovo", "hyundai", "epson", "electrolux"] as const;
           const BrandButton = ({ id }: { id: string }) => {
             const name = brands.find((x) => x.id === id)?.name || id.toUpperCase();
             const isActive = activeBrand === id;
@@ -392,12 +405,12 @@ export default function Home() {
           };
           return (
             <div className="-mx-1 px-1">
-              <div className="grid grid-cols-5 gap-2 mb-2">
+              <div className="grid grid-cols-6 gap-2 mb-2">
                 {FIRST_ROW.map((id) => (
                   <BrandButton key={id} id={id} />
                 ))}
               </div>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-7 gap-2">
                 {SECOND_ROW.map((id) => (
                   <BrandButton key={id} id={id} />
                 ))}
@@ -409,7 +422,7 @@ export default function Home() {
 
       <Tabs value={activeBrand} onValueChange={setActiveBrand} className="w-full">
         {/* Barra superior scrollable en mobile */}
-        <TabsList className="hidden sm:grid w-full grid-cols-8 gap-1" aria-label="Selecciona una marca">
+        <TabsList className="hidden sm:grid w-full grid-cols-13 gap-1" aria-label="Selecciona una marca">
           {brands.map((b) => (
             <TabsTrigger key={b.id} value={b.id} className="text-xs py-2">
               {b.name}
@@ -429,40 +442,77 @@ export default function Home() {
                     <CardContent className="p-2 pt-2 pb-2">
 
                        <div className="text-xs font-medium leading-tight text-center line-clamp-2 min-h-[2.2rem]">{p.name}</div>
-                      <div className="text-[11px] text-muted-foreground mt-1">${p.price.toLocaleString()}</div>
+                      
                       {inCart === 0 ? (
-                        <div className="mt-2 flex items-center gap-2">
-                          <Input
-                            type="number"
-                            min={1}
-                            inputMode="numeric"
-                            placeholder="1"
-                            value={pendingQty[p.id] ?? ""}
-                            onChange={(e) => {
-                              const raw = e.target.value;
-                              // permitir vacío para que el usuario pueda borrar
-                              if (raw === "") {
-                                setPendingQty((s) => ({ ...s, [p.id]: "" }));
-                                return;
-                              }
-                              // solo guardar números enteros positivos como string
-                              const n = Math.floor(Number(raw));
-                              if (Number.isFinite(n) && n > 0) {
-                                setPendingQty((s) => ({ ...s, [p.id]: String(n) }));
-                              }
-                            }}
-                            className="w-16 h-8"
-                          />
+                        <div className="mt-2 space-y-2">
+                          {/* Precio 1 */}
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-medium">${p.price.toLocaleString()}</span>
+                            <Input
+                              type="number"
+                              min={1}
+                              inputMode="numeric"
+                              placeholder="0"
+                              value={pendingQty[p.id] ?? ""}
+                              onChange={(e) => {
+                                const raw = e.target.value;
+                                if (raw === "") {
+                                  setPendingQty((s) => ({ ...s, [p.id]: "" }));
+                                  return;
+                                }
+                                const n = Math.floor(Number(raw));
+                                if (Number.isFinite(n) && n >= 0) {
+                                  setPendingQty((s) => ({ ...s, [p.id]: String(n) }));
+                                }
+                              }}
+                              className="w-16 h-8"
+                            />
+                          </div>
+                          
+                          {/* Precio 2 (solo para Samsung y Haceb) */}
+                          {(b.id === 'samsung' || b.id === 'haceb') && p.price2 && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-medium">${p.price2.toLocaleString()}</span>
+                              <Input
+                                type="number"
+                                min={1}
+                                inputMode="numeric"
+                                placeholder="0"
+                                value={pendingQty2[p.id] ?? ""}
+                                onChange={(e) => {
+                                  const raw = e.target.value;
+                                  if (raw === "") {
+                                    setPendingQty2((s) => ({ ...s, [p.id]: "" }));
+                                    return;
+                                  }
+                                  const n = Math.floor(Number(raw));
+                                  if (Number.isFinite(n) && n >= 0) {
+                                    setPendingQty2((s) => ({ ...s, [p.id]: String(n) }));
+                                  }
+                                }}
+                                className="w-16 h-8"
+                              />
+                            </div>
+                          )}
+                          
                           <Button
                             size="sm"
-                            className="flex-1"
+                            className="w-full"
                             onClick={() => {
-                              const raw = pendingQty[p.id];
-                              const n = Math.floor(Number(raw));
-                              const q = Number.isFinite(n) && n > 0 ? n : 1;
-                              addToCart(b.id, p, q);
+                              const qty1 = Math.floor(Number(pendingQty[p.id])) || 0;
+                              const qty2 = Math.floor(Number(pendingQty2[p.id])) || 0;
+                              
+                              if (qty1 > 0) {
+                                addToCart(b.id, { ...p, price: p.price }, qty1);
+                              }
+                              if (qty2 > 0 && p.price2) {
+                                addToCart(b.id, { ...p, price: p.price2, id: p.id + '-p2' }, qty2);
+                              }
+                              
                               setPendingQty((s) => ({ ...s, [p.id]: "" }));
+                              setPendingQty2((s) => ({ ...s, [p.id]: "" }));
                             }}
+                            disabled={!pendingQty[p.id] && !pendingQty2[p.id]}
                           >
                             Agregar
                           </Button>
